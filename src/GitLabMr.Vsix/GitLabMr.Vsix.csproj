@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GitLabMr.Vsix</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+
+    <!-- VSIX bits -->
+    <!-- Without this, Microsoft.VSSDK.BuildTools 18.x imports nothing and the build
+         silently produces a plain DLL: no .pkgdef, no .vsix, no F5 deploy. -->
+    <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <CreateVsixContainer>true</CreateVsixContainer>
+    <DeployExtension Condition="'$(Configuration)' == 'Debug'">true</DeployExtension>
+    <VsixDeployOnDebug>true</VsixDeployOnDebug>
+
+    <!-- F5 launches the Experimental Instance -->
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Meta-package: brings in all VS SDK reference assemblies.
+         ExcludeAssets=runtime: VS itself provides these at run time. -->
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <!-- 18.5+ = official SDK-style VSIX build support (VS 2026 era tooling) -->
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.5.40034" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GitLabMr.Core\GitLabMr.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ProtectedData (DPAPI) lives in System.Security.dll on .NET Framework -->
+    <Reference Include="System.Security" />
+    <!-- OleMenuCommandService derives from MenuCommandService, which lives in System.Design.dll -->
+    <Reference Include="System.Design" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="GitLabMrPackage.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+    <None Update="source.extension.vsixmanifest">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+
+</Project>

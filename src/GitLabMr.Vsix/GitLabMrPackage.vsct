@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidGitLabMrPackage">
+    <Groups>
+      <Group guid="guidGitLabMrCmdSet" id="grpMain" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidGitLabMrCmdSet" id="cmdidShowMrWindow" priority="0x0100" type="Button">
+        <Parent guid="guidGitLabMrCmdSet" id="grpMain" />
+        <Strings>
+          <ButtonText>GitLab Merge Requests</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <!-- Must match GitLabMrPackage.PackageGuidString -->
+    <GuidSymbol name="guidGitLabMrPackage" value="{b7f0a5d3-4c2e-4c8f-9a1d-2f6e8c3b7a10}" />
+
+    <GuidSymbol name="guidGitLabMrCmdSet" value="{d4a91c2b-7e3f-4b6a-8c5d-1e9f0a2b3c4d}">
+      <IDSymbol name="grpMain" value="0x1020" />
+      <IDSymbol name="cmdidShowMrWindow" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
