@@ -73,7 +73,7 @@ namespace GitLabMr.Core
                 ["source_branch"] = form.SourceBranch,
                 ["target_branch"] = form.TargetBranch,
                 ["title"] = form.Title,
-                ["description"] = form.Description ?? string.Empty,
+                ["description"] = ToMarkdownHardBreaks(form.Description),
                 ["remove_source_branch"] = form.DeleteSourceBranch,
                 ["squash"] = form.Squash
             };
@@ -109,6 +109,12 @@ namespace GitLabMr.Core
 
             var body = new Dictionary<string, object> { ["title"] = title };
             return SendAsync<GlMergeRequest>(HttpMethod.Put, "projects/" + projectId + "/merge_requests/" + iid, body);
+        }
+
+        private static string ToMarkdownHardBreaks(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            return text.Replace("\r\n", "\n").Replace("\n", "  \n");
         }
 
         // The draft prefixes GitLab itself recognizes.
