@@ -29,6 +29,9 @@
     <!-- 18.5+ = official SDK-style VSIX build support (VS 2026 era tooling) -->
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.5.40034" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" ExcludeAssets="runtime" />
+    <!-- IGitExt: VS's own Git extensibility service. Compile-time surface only;
+         the implementation ships with VS's built-in Git provider. -->
+    <PackageReference Include="Microsoft.VisualStudio.TeamFoundation.Git.Extensibility" Version="17.0.32322.3" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>

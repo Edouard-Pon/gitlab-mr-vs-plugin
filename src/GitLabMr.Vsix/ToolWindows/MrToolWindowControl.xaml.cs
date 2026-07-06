@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using GitLabMr.Core;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.TeamFoundation.Git.Extensibility;
 using Microsoft.Win32;
 
 namespace GitLabMr.Vsix.ToolWindows
@@ -35,9 +38,23 @@ namespace GitLabMr.Vsix.ToolWindows
         private GlMergeRequest _currentMr;
         private GlMember _me;
 
+        // Auto-refresh on branch switch: listen to VS's own Git service instead of
+        // requiring a manual click of "Refresh context".
+        private readonly DispatcherTimer _branchChangeDebounceTimer;
+        private IGitExt _gitExt;
+
         public MrToolWindowControl()
         {
             InitializeComponent();
+
+            // VS's Git service can raise the change notification more than once for a
+            // single checkout; debounce so that triggers one refresh instead of several.
+            _branchChangeDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+            _branchChangeDebounceTimer.Tick += async (s, e) =>
+            {
+                _branchChangeDebounceTimer.Stop();
+                await RefreshContextAsync();
+            };
         }
 
         // =====================================================================
@@ -56,7 +73,30 @@ namespace GitLabMr.Vsix.ToolWindows
             if (string.IsNullOrEmpty(_settings.GitLabBaseUrl) || SettingsStore.LoadToken() == null)
                 expSettings.IsExpanded = true;
 
+            EnsureGitExtSubscription();
             _ = RefreshContextAsync();
+        }
+
+        /// <summary>Subscribes to VS's own Git service so branch switches made through the VS
+        /// Git UI (or any other means VS's Git provider notices) trigger a refresh.</summary>
+        private void EnsureGitExtSubscription()
+        {
+            if (_gitExt != null) return;
+            ThreadHelper.ThrowIfNotOnUIThread();
+            _gitExt = Package.GetGlobalService(typeof(IGitExt)) as IGitExt;
+            if (_gitExt == null) return;
+            _gitExt.PropertyChanged += OnGitExtPropertyChanged;
+        }
+
+        private void OnGitExtPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(IGitExt.ActiveRepositories)) return;
+            Dispatcher.BeginInvoke((Action)(() =>
+            {
+                SetStatus("Branch change detected, refreshing...");
+                _branchChangeDebounceTimer.Stop();
+                _branchChangeDebounceTimer.Start();
+            }));
         }
 
         // =====================================================================
@@ -183,6 +223,17 @@ namespace GitLabMr.Vsix.ToolWindows
             if (solution == null) return null;
             solution.GetSolutionInfo(out string dir, out _, out _);
             return dir;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            _branchChangeDebounceTimer.Stop();
+
+            if (_gitExt != null)
+            {
+                _gitExt.PropertyChanged -= OnGitExtPropertyChanged;
+                _gitExt = null;
+            }
         }
 
         // =====================================================================
