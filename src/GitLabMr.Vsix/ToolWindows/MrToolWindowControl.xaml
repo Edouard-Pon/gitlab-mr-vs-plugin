@@ -372,10 +372,26 @@
         </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="8">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- ============ Settings ============ -->
+        <!-- ============ Status line ============
+             Pinned above the scrollable form (not inside it) so it stays visible even
+             when a dropdown further down is open — a popup can't cover a row above it. -->
+        <Border Grid.Row="0" Panel.ZIndex="1" Padding="8,6" BorderThickness="0,0,0,1"
+                Background="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBackgroundKey}}"
+                BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBorderKey}}">
+            <TextBlock x:Name="lblStatus" TextWrapping="Wrap" Opacity="0.85"
+                       Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}" />
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="8">
+
+                <!-- ============ Settings ============ -->
             <Expander x:Name="expSettings" IsExpanded="False">
                 <Expander.Header>
                     <TextBlock Text="Settings — GitLab URL &amp; token" Style="{StaticResource SectionHeader}" />
@@ -513,12 +529,7 @@
                 </StackPanel>
             </Expander>
 
-            <!-- ============ Status line ============ -->
-            <Border Padding="2,8" Margin="0,8,0,0" BorderThickness="0,1,0,0"
-                    BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowBorderKey}}">
-                <TextBlock x:Name="lblStatus" TextWrapping="Wrap" Opacity="0.85"
-                           Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}" />
-            </Border>
         </StackPanel>
-    </ScrollViewer>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
