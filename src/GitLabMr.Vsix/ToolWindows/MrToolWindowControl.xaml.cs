@@ -333,6 +333,7 @@ namespace GitLabMr.Vsix.ToolWindows
         private async void OnMerge(object sender, RoutedEventArgs e)
         {
             if (_currentMr == null) return;
+            if (!ConfirmMerge(_currentMr)) return;
             try
             {
                 btnMerge.IsEnabled = false;
@@ -529,6 +530,7 @@ namespace GitLabMr.Vsix.ToolWindows
         {
             var item = ItemFrom(sender);
             if (item == null) return;
+            if (!ConfirmMerge(item.Mr)) return;
             try
             {
                 SetStatus("Checking mergeability of !" + item.Mr.Iid + "...");
@@ -636,6 +638,14 @@ namespace GitLabMr.Vsix.ToolWindows
         // =====================================================================
         // Helpers
         // =====================================================================
+
+        /// <summary>Merging isn't reversible from here, so ask before calling the API.</summary>
+        private static bool ConfirmMerge(GlMergeRequest mr)
+        {
+            return MessageBox.Show(
+                "Merge !" + mr.Iid + " \"" + mr.Title + "\" into " + mr.TargetBranch + "?",
+                "Confirm merge", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
 
         private void ShowMrPanel()
         {
