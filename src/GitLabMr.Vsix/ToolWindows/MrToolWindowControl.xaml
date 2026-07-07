@@ -392,20 +392,24 @@
             <StackPanel Margin="8">
 
                 <!-- ============ Settings ============ -->
-            <Expander x:Name="expSettings" IsExpanded="False">
+            <Expander x:Name="expSettings" IsExpanded="False"
+                      ToolTip="GitLab connection: base URL and access token">
                 <Expander.Header>
-                    <TextBlock Text="Settings — GitLab URL &amp; token" Style="{StaticResource SectionHeader}" />
+                    <TextBlock Text="Settings" Style="{StaticResource SectionHeader}" />
                 </Expander.Header>
                 <StackPanel>
-                    <TextBlock Text="GitLab base URL (e.g. https://gitlab.example.com)" Style="{StaticResource FieldLabel}" />
-                    <TextBox x:Name="txtBaseUrl" />
+                    <TextBlock Text="GitLab URL" Style="{StaticResource FieldLabel}"
+                               ToolTip="e.g. https://gitlab.example.com" />
+                    <TextBox x:Name="txtBaseUrl" ToolTip="e.g. https://gitlab.example.com" />
 
-                    <TextBlock Text="Personal Access Token (scope: api) — stored DPAPI-encrypted" Style="{StaticResource FieldLabel}" />
-                    <PasswordBox x:Name="pwdToken" />
+                    <TextBlock Text="Access token" Style="{StaticResource FieldLabel}"
+                               ToolTip="Personal Access Token with the 'api' scope. Stored encrypted (DPAPI) on this machine." />
+                    <PasswordBox x:Name="pwdToken"
+                                 ToolTip="Personal Access Token with the 'api' scope. Stored encrypted (DPAPI) on this machine." />
                     <TextBlock x:Name="lblTokenState" FontStyle="Italic" Style="{StaticResource Muted}" />
 
-                    <CheckBox x:Name="chkIgnoreTls" Content="Ignore TLS certificate errors (dev only — trust the cert in Windows instead)"
-                              Margin="0,10,0,0" />
+                    <CheckBox x:Name="chkIgnoreTls" Content="Ignore TLS certificate errors" Margin="0,10,0,0"
+                              ToolTip="Dev convenience only — prefer trusting the certificate in Windows instead." />
 
                     <WrapPanel>
                         <Button x:Name="btnSaveSettings" Content="Save settings" Click="OnSaveSettings" Margin="0,10,8,0" />
@@ -446,11 +450,14 @@
                         <TextBlock Text="Assignee" Style="{StaticResource FieldLabel}" />
                         <ComboBox x:Name="cmbAssignee" />
 
-                        <TextBlock Text="Reviewer (request review)" Style="{StaticResource FieldLabel}" />
-                        <ComboBox x:Name="cmbReviewer" />
+                        <TextBlock Text="Reviewer" Style="{StaticResource FieldLabel}"
+                                   ToolTip="Requests a review from this person" />
+                        <ComboBox x:Name="cmbReviewer" ToolTip="Requests a review from this person" />
 
-                        <CheckBox x:Name="chkDeleteSource" Content="Delete source branch when merged" IsChecked="True" Margin="0,12,0,0" />
-                        <CheckBox x:Name="chkSquash" Content="Squash commits when merged" Margin="0,8,0,0" />
+                        <CheckBox x:Name="chkDeleteSource" Content="Delete source branch" IsChecked="True" Margin="0,12,0,0"
+                                  ToolTip="When this MR is merged" />
+                        <CheckBox x:Name="chkSquash" Content="Squash commits" Margin="0,8,0,0"
+                                  ToolTip="When this MR is merged" />
 
                         <WrapPanel>
                             <Button x:Name="btnCreate" Content="Create merge request" Click="OnCreateMr"
@@ -517,9 +524,10 @@
                                                     ToolTip="Open in a specific browser" />
                                         </WrapPanel>
 
-                                        <TextBlock Text="Read-only: you are not a reviewer of this merge request."
+                                        <TextBlock Text="Read-only"
                                                    FontStyle="Italic" Opacity="0.55" Margin="0,6,0,0" TextWrapping="Wrap"
                                                    Foreground="{DynamicResource {x:Static vsshell:VsBrushes.ToolWindowTextKey}}"
+                                                   ToolTip="You are not a reviewer of this merge request."
                                                    Visibility="{Binding IsReadOnly, Converter={StaticResource BoolToVis}}" />
                                     </StackPanel>
                                 </Border>

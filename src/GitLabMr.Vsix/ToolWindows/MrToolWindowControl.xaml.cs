@@ -456,15 +456,14 @@ namespace GitLabMr.Vsix.ToolWindows
                 Mr = mr,
                 Header = "!" + mr.Iid + "  " + mr.Title,
                 BranchInfo = mr.SourceBranch + "  →  " + mr.TargetBranch,
-                StateInfo = "State: " + mr.State
-                    + (mr.Draft ? "  (draft)" : "")
-                    + "   Merge status: " + (mr.DetailedMergeStatus ?? "?")
-                    + (mr.HasConflicts ? "   (CONFLICTS)" : "")
-                    + (mr.UpdatedAt.HasValue ? "   Updated: " + mr.UpdatedAt.Value.ToLocalTime().ToString("g") : ""),
+                StateInfo = "State: " + mr.State + (mr.Draft ? " (draft)" : "")
+                    + "  ·  Merge: " + (mr.DetailedMergeStatus ?? "unknown")
+                    + (mr.HasConflicts ? "  ·  CONFLICTS" : "")
+                    + (mr.UpdatedAt.HasValue ? "  ·  Updated " + mr.UpdatedAt.Value.ToLocalTime().ToString("g") : ""),
                 PeopleInfo = "Author: " + (mr.Author != null ? mr.Author.ToString() : "?")
-                    + "   Reviewer: " + (hasReviewers
+                    + "  ·  Reviewer: " + (hasReviewers
                         ? string.Join(", ", mr.Reviewers.Select(r => r.ToString()))
-                        : "(none)"),
+                        : "none"),
                 CanMarkReady = mr.Draft && (isAuthor || isReviewer),
                 CanApprove = canAct && !mr.Draft,
                 CanMerge = canAct && !mr.Draft
