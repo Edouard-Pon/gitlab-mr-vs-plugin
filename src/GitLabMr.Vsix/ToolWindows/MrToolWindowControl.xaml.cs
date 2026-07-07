@@ -159,8 +159,17 @@ namespace GitLabMr.Vsix.ToolWindows
                     return;
                 }
 
+                string previousBranch = _gitContext?.CurrentBranch;
                 SetStatus("Reading git context...");
                 _gitContext = await Task.Run(() => GitContextReader.Read(solutionDir));
+
+                // A different branch means the created-MR box (if still showing one the user
+                // never approved/merged) belongs to a different piece of work; drop it.
+                if (previousBranch != null && previousBranch != _gitContext.CurrentBranch && pnlMr.Visibility == Visibility.Visible)
+                {
+                    _currentMr = null;
+                    pnlMr.Visibility = Visibility.Collapsed;
+                }
 
                 lblContext.Text = _gitContext.ProjectPath + "  —  source branch: " + _gitContext.CurrentBranch;
 
@@ -273,6 +282,7 @@ namespace GitLabMr.Vsix.ToolWindows
                 {
                     _currentMr = await client.CreateMergeRequestAsync(_project.Id, form);
                 }
+                ClearFormFields();
                 ShowMrPanel();
                 SetStatus("Merge request !" + _currentMr.Iid + " created.");
                 await LoadMrListAsync();
@@ -289,6 +299,17 @@ namespace GitLabMr.Vsix.ToolWindows
 
         private void OnClearForm(object sender, RoutedEventArgs e)
         {
+            ClearFormFields();
+            _currentMr = null;
+            pnlMr.Visibility = Visibility.Collapsed;
+            SetStatus("Form cleared.");
+        }
+
+        /// <summary>Resets the create-MR input fields. Used by the "Clear form" button and,
+        /// after a successful create, to ready the form for the next MR without hiding the
+        /// just-created MR's panel (title/state + Approve/Merge buttons).</summary>
+        private void ClearFormFields()
+        {
             txtTitle.Text = string.Empty;
             txtDescription.Text = string.Empty;
             chkDraft.IsChecked = false;
@@ -297,10 +318,6 @@ namespace GitLabMr.Vsix.ToolWindows
             cmbTargetBranch.Text = _project?.DefaultBranch ?? string.Empty;
             if (cmbAssignee.Items.Count > 0) cmbAssignee.SelectedIndex = 0;
             if (cmbReviewer.Items.Count > 0) cmbReviewer.SelectedIndex = 0;
-
-            _currentMr = null;
-            pnlMr.Visibility = Visibility.Collapsed;
-            SetStatus("Form cleared.");
         }
 
         // =====================================================================
@@ -331,8 +348,12 @@ namespace GitLabMr.Vsix.ToolWindows
                         chkSquash.IsChecked == true,
                         chkDeleteSource.IsChecked == true);
                 }
-                ShowMrPanel();
-                SetStatus("Merged. State: " + _currentMr.State);
+                // Nothing left to do with this MR from here, so close its box
+                // instead of leaving stale Approve/Merge buttons on screen.
+                string mergedState = _currentMr.State;
+                _currentMr = null;
+                pnlMr.Visibility = Visibility.Collapsed;
+                SetStatus("Merged. State: " + mergedState);
                 await LoadMrListAsync();
             }
             catch (GitLabApiException ex)
